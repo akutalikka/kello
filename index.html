@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelloharjoitus</title>
+    <title>Kelloharjoitus - Korjattu</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -24,7 +24,6 @@
             width: 100%;
         }
 
-        /* YLÄOSA: Kello ja Tarkistus */
         .top-row {
             display: flex;
             justify-content: space-around;
@@ -69,11 +68,13 @@
         #message {
             font-size: 1.5rem;
             font-weight: bold;
-            height: 40px;
+            height: 50px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* ALAOSA: Valinnat */
         .selection-area {
             display: flex;
             flex-direction: column;
@@ -89,13 +90,6 @@
             justify-content: center;
         }
 
-        .hours-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-        }
-
         .box {
             min-width: 60px;
             height: 60px;
@@ -109,6 +103,7 @@
             font-size: 1.4rem;
             background: white;
             transition: all 0.2s;
+            user-select: none;
         }
 
         .box.wide { width: 120px; height: 55px; }
@@ -122,8 +117,7 @@
 
     <div class="container">
         <div class="top-row">
-            <canvas id="clock-canvas" width="260" height="260"></canvas>
-            
+            <canvas id="clock-canvas" width="280" height="280"></canvas>
             <div class="check-area">
                 <button id="check-btn">TARKISTA</button>
                 <div id="message"></div>
@@ -131,7 +125,6 @@
         </div>
 
         <div class="selection-area">
-            
             <div>
                 <h3>Minuutit</h3>
                 <div class="option-group" id="minutes-group">
@@ -151,10 +144,10 @@
                 <div class="box wide" data-val="tasan">tasan</div>
             </div>
 
-            <div class="hours-container">
+            <div id="hours-container">
                 <h3>Tunnit</h3>
                 <div class="option-group" id="hours-row-1"></div>
-                <div class="option-group" id="hours-row-2"></div>
+                <div class="option-group" id="hours-row-2" style="margin-top:10px;"></div>
             </div>
         </div>
     </div>
@@ -169,7 +162,6 @@
         let targetHour = 0;
         let targetMinute = 0;
 
-        // Luo tuntinapit 1-6 ja 7-12
         const row1 = document.getElementById('hours-row-1');
         const row2 = document.getElementById('hours-row-2');
         for (let i = 1; i <= 12; i++) {
@@ -177,18 +169,15 @@
             div.className = 'box';
             div.innerText = i;
             div.dataset.val = i;
-            if (i <= 6) row1.appendChild(div);
-            else row2.appendChild(div);
+            if (i <= 6) row1.appendChild(div); else row2.appendChild(div);
         }
 
-        // Valintalogiikka
         document.querySelectorAll('.option-group').forEach(group => {
             group.addEventListener('click', (e) => {
                 const target = e.target.closest('.box');
                 if (target) {
-                    // Jos klikataan tuntia, poistetaan valinta molemmilta tuntiluokan riveiltä
-                    if (group.parentNode.classList.contains('hours-container')) {
-                        document.querySelectorAll('.hours-container .box').forEach(b => b.classList.remove('selected'));
+                    if (group.id.startsWith('hours-row')) {
+                        document.querySelectorAll('[id^="hours-row"] .box').forEach(b => b.classList.remove('selected'));
                     } else {
                         group.querySelectorAll('.box').forEach(b => b.classList.remove('selected'));
                     }
@@ -200,7 +189,6 @@
         function drawClock(h, m) {
             ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
             
-            // Kellotaulu
             ctx.beginPath();
             ctx.arc(0, 0, drawRadius, 0, 2 * Math.PI);
             ctx.fillStyle = 'white';
@@ -209,23 +197,29 @@
             ctx.lineWidth = 6;
             ctx.stroke();
 
-            // Numerot
-            ctx.font = "bold 20px Arial";
+            ctx.font = "bold 22px Arial";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
             ctx.fillStyle = "#333";
+            
             for (let num = 1; num <= 12; num++) {
                 let ang = num * Math.PI / 6;
                 ctx.rotate(ang);
-                ctx.translate(0, -drawRadius * 0.8);
+                ctx.translate(0, -drawRadius * 0.82);
                 ctx.rotate(-ang);
-                ctx.fillText(num.toString(), 0, 5);
+                // Pieni korjaus numeron 12 sijoitteluun (y-offset)
+                ctx.fillText(num.toString(), 0, 2); 
                 ctx.rotate(ang);
-                ctx.translate(0, drawRadius * 0.8);
+                ctx.translate(0, drawRadius * 0.82);
                 ctx.rotate(-ang);
             }
 
-            // Viisarit
-            drawHand((m * Math.PI / 30), drawRadius * 0.85, 4, "#2196F3"); // Min
-            drawHand((h * Math.PI / 6) + (m * Math.PI / 360), drawRadius * 0.5, 9, "#333"); // Tunti
+            // Minuuttiviisari (tarkka 5min asetus)
+            drawHand((m * Math.PI / 30), drawRadius * 0.85, 4, "#2196F3");
+
+            // Tuntiviisari (liukuva asento, mutta perustuu kohdatuntiin)
+            let hourPos = (h * Math.PI / 6) + (m * Math.PI / 360);
+            drawHand(hourPos, drawRadius * 0.5, 9, "#333");
 
             ctx.beginPath();
             ctx.arc(0, 0, 8, 0, 2 * Math.PI);
@@ -246,8 +240,8 @@
         }
 
         function randomizeTime() {
-            targetHour = Math.floor(Math.random() * 12) + 1;
-            targetMinute = Math.floor(Math.random() * 12) * 5;
+            targetHour = Math.floor(Math.random() * 12) + 1; // 1-12
+            targetMinute = Math.floor(Math.random() * 12) * 5; // 0, 5, 10... 55
             drawClock(targetHour, targetMinute);
             document.querySelectorAll('.box').forEach(b => b.classList.remove('selected'));
         }
@@ -256,34 +250,41 @@
             const msgDiv = document.getElementById('message');
             msgDiv.innerText = text;
             msgDiv.style.color = color;
-            setTimeout(() => { if(msgDiv.innerText === text) msgDiv.innerText = ''; }, duration);
+            setTimeout(() => { if (msgDiv.innerText === text) msgDiv.innerText = ''; }, duration);
         }
 
         document.getElementById('check-btn').addEventListener('click', () => {
             const selMin = document.querySelector('#minutes-group .selected');
             const selRel = document.querySelector('#rel-group .selected');
-            const selHour = document.querySelector('.hours-container .selected');
+            const selHour = document.querySelector('[id^="hours-row"] .selected');
 
             const relVal = selRel ? selRel.dataset.val : null;
             const hourVal = selHour ? parseInt(selHour.dataset.val) : null;
             const minVal = selMin ? parseInt(selMin.dataset.val) : 0;
 
-            const needsMin = (relVal === "yli" || relVal === "vaille");
-
-            if (!relVal || !hourVal || (needsMin && !selMin)) {
+            if (!relVal || !hourVal || ((relVal === "yli" || relVal === "vaille") && !selMin)) {
                 showMessage("Valitse kellon aika!", "#d4a017", 2000);
                 return;
             }
 
             let isCorrect = false;
-            const nextHour = (targetHour % 12) + 1;
+            // Muunnetaan targetHour 12 -> 0 laskuja varten, jotta seuraava tunti on aina oikein (0+1=1)
+            const baseHour = targetHour === 12 ? 0 : targetHour;
+            const nextHour = baseHour + 1;
 
-            if (relVal === "tasan" && targetMinute === 0 && hourVal === targetHour) isCorrect = true;
-            else if (relVal === "puoli" && targetMinute === 30 && hourVal === nextHour) isCorrect = true;
-            else if (relVal === "yli" && targetMinute > 0 && targetMinute <= 20 && minVal === targetMinute && hourVal === targetHour) isCorrect = true;
-            else if (relVal === "vaille" && targetMinute >= 40 && minVal === (60-targetMinute) && hourVal === nextHour) isCorrect = true;
-            else if (targetMinute === 25 && relVal === "vaille" && minVal === 5 && hourVal === nextHour) isCorrect = true;
-            else if (targetMinute === 35 && relVal === "yli" && minVal === 5 && hourVal === nextHour) isCorrect = true;
+            if (relVal === "tasan" && targetMinute === 0 && hourVal === targetHour) {
+                isCorrect = true;
+            } else if (relVal === "puoli" && targetMinute === 30 && hourVal === nextHour) {
+                isCorrect = true;
+            } else if (relVal === "yli" && targetMinute > 0 && targetMinute <= 20 && minVal === targetMinute && hourVal === targetHour) {
+                isCorrect = true;
+            } else if (relVal === "vaille" && targetMinute >= 40 && minVal === (60-targetMinute) && hourVal === nextHour) {
+                isCorrect = true;
+            } else if (targetMinute === 25 && relVal === "vaille" && minVal === 5 && hourVal === nextHour) {
+                isCorrect = true; 
+            } else if (targetMinute === 35 && relVal === "yli" && minVal === 5 && hourVal === nextHour) {
+                isCorrect = true;
+            }
 
             if (isCorrect) {
                 showMessage("Oikein!", "green", 2000);
