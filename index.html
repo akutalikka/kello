@@ -6,109 +6,84 @@
     <title>Kelloharjoitus</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             background-color: #f0f4f8;
-            margin: 20px;
+            margin: 0;
+            padding: 20px;
         }
 
-        .main-wrapper {
-            display: flex;
+        .container {
             background: white;
             padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.1);
-            gap: 40px;
-            max-width: 1000px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
         }
 
-        /* Vasen puoli: Kello ja sen alla valinnat */
-        .game-area {
+        /* YLÄOSA: Kello ja Tarkistus */
+        .top-row {
             display: flex;
-            flex-direction: column;
+            justify-content: space-around;
             align-items: center;
-            gap: 25px;
-            flex: 2;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         #clock-canvas {
             background-color: #fff;
             border-radius: 50%;
-            border: 1px solid #eee;
         }
 
-        .selection-panel {
+        .check-area {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            width: 100%;
-        }
-
-        /* Oikea puoli: Vain tarkistus */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-width: 200px;
-            justify-content: flex-start;
-            padding-top: 20px;
-        }
-
-        /* Nappien tyylit */
-        .option-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .hours-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-        }
-
-        .box {
-            min-width: 60px;
-            height: 55px;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.3rem;
-            transition: all 0.2s;
-            background: #fff;
+            gap: 15px;
+            min-width: 250px;
         }
 
-        .box.wide { width: 110px; }
-        .box:hover { border-color: #2196F3; background: #f0f7ff; }
-        .box.selected { background: #2196F3; color: white; border-color: #1976D2; box-shadow: 0 4px 8px rgba(33,150,243,0.3); }
-
-        /* Tarkistus ja viestit */
         #check-btn {
-            padding: 25px 20px;
-            font-size: 24px;
+            padding: 25px 40px;
+            font-size: 26px;
             font-weight: bold;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 15px;
             cursor: pointer;
-            transition: background 0.3s;
+            width: 100%;
+            box-shadow: 0 4px 0 #388E3C;
+            transition: all 0.1s;
         }
 
-        #check-btn:hover { background-color: #45a049; }
+        #check-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #388E3C;
+        }
 
         #message {
-            font-weight: bold;
-            text-align: center;
             font-size: 1.5rem;
-            min-height: 60px;
+            font-weight: bold;
+            height: 40px;
+            text-align: center;
+        }
+
+        /* ALAOSA: Valinnat */
+        .selection-area {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 25px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
             justify-content: center
