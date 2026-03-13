@@ -6,7 +6,7 @@
     <title>Kelloharjoitus</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -17,20 +17,20 @@
         .main-container {
             display: flex;
             background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            gap: 40px;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            gap: 30px;
             flex-wrap: wrap;
             justify-content: center;
+            max-width: 900px;
         }
 
-        /* Vasen puoli */
+        /* Vasen puoli: Kello */
         .left-panel {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 15px;
         }
 
         #clock-canvas {
@@ -38,76 +38,100 @@
             border-radius: 50%;
         }
 
-        /* Oikea puoli */
+        /* Oikea puoli: Ohjaimet */
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            min-width: 300px;
+            gap: 20px;
+            flex: 1;
+            min-width: 350px;
         }
 
+        /* Tarkistusosio uuteen paikkaan */
+        .check-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #check-btn {
+            padding: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        #check-btn:active { transform: scale(0.98); }
+        #check-btn:hover { background-color: #45a049; }
+
+        #message {
+            height: 35px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        /* Valintaryhmät */
         .option-group {
             display: flex;
             flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Tuntien kaksi riviä */
+        .hours-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
         }
 
         .box {
-            width: 50px;
-            height: 40px;
+            min-width: 55px;
+            height: 55px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s;
-            background: white;
-        }
-
-        .box.wide { width: 85px; }
-        .box:hover { border-color: #2196F3; background: #e3f2fd; }
-        .box.selected { background: #2196F3; color: white; border-color: #1976D2; }
-
-        /* Palaute ja painikkeet */
-        #message {
-            height: 30px;
-            font-weight: bold;
-            text-align: center;
             font-size: 1.2rem;
+            transition: all 0.2s;
+            background: #fff;
         }
 
-        #check-btn {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.3s;
-        }
+        .box.wide { width: 100px; height: 50px; }
+        .box:hover { border-color: #2196F3; background: #e3f2fd; }
+        .box.selected { background: #2196F3; color: white; border-color: #1976D2; box-shadow: 0 0 8px rgba(33,150,243,0.5); }
 
-        #check-btn:hover { background-color: #45a049; }
-        h3 { margin-bottom: 8px; color: #333; }
-        .hidden-title { margin-top: 10px; }
+        h3 { margin: 0 0 5px 0; color: #333; font-size: 1.3rem; }
     </style>
 </head>
 <body>
 
-    <h1>Harjoittele kelloa</h1>
+    <h1>Kello-oppitunti</h1>
 
     <div class="main-container">
         <div class="left-panel">
-            <canvas id="clock-canvas" width="300" height="300"></canvas>
-            
-            <button id="check-btn">Tarkista</button>
-            <div id="message"></div>
+            <canvas id="clock-canvas" width="250" height="250"></canvas>
         </div>
 
         <div class="controls">
+            <div class="check-section">
+                <button id="check-btn">Tarkista</button>
+                <div id="message"></div>
+            </div>
+
             <div>
                 <h3>Minuutit</h3>
                 <div class="option-group" id="minutes-group">
@@ -120,18 +144,16 @@
                 </div>
             </div>
 
-            <div class="hidden-title">
-                <div class="option-group" id="rel-group">
-                    <div class="box wide" data-val="yli">yli</div>
-                    <div class="box wide" data-val="puoli">puoli</div>
-                    <div class="box wide" data-val="vaille">vaille</div>
-                    <div class="box wide" data-val="tasan">tasan</div>
-                </div>
+            <div class="option-group" id="rel-group">
+                <div class="box wide" data-val="yli">yli</div>
+                <div class="box wide" data-val="puoli">puoli</div>
+                <div class="box wide" data-val="vaille">vaille</div>
+                <div class="box wide" data-val="tasan">tasan</div>
             </div>
 
             <div>
                 <h3>Tunnit</h3>
-                <div class="option-group" id="hours-group">
+                <div class="hours-grid" id="hours-group">
                     </div>
             </div>
         </div>
@@ -147,7 +169,7 @@
         let targetHour = 0;
         let targetMinute = 0;
 
-        // Alusta tuntilaatikot
+        // Luo tuntinapit kahdelle riville
         const hoursGroup = document.getElementById('hours-group');
         for (let i = 1; i <= 12; i++) {
             const div = document.createElement('div');
@@ -157,8 +179,8 @@
             hoursGroup.appendChild(div);
         }
 
-        // Valintojen hallinta
-        document.querySelectorAll('.option-group').forEach(group => {
+        // Valintojen klikkauslogiikka
+        document.querySelectorAll('.option-group, .hours-grid').forEach(group => {
             group.addEventListener('click', (e) => {
                 if (e.target.classList.contains('box')) {
                     const isAlreadySelected = e.target.classList.contains('selected');
@@ -171,117 +193,30 @@
         function drawClock(h, m) {
             ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
             
-            // Taulu
+            // Kellotaulu
             ctx.beginPath();
             ctx.arc(0, 0, drawRadius, 0, 2 * Math.PI);
             ctx.fillStyle = 'white';
             ctx.fill();
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 5;
             ctx.stroke();
 
             // Numerot
-            ctx.font = "bold 20px Arial";
+            ctx.font = "bold 22px Arial";
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = "#333";
             for (let num = 1; num <= 12; num++) {
                 let ang = num * Math.PI / 6;
                 ctx.rotate(ang);
-                ctx.translate(0, -drawRadius * 0.82);
+                ctx.translate(0, -drawRadius * 0.78);
                 ctx.rotate(-ang);
                 ctx.fillText(num.toString(), 0, 0);
                 ctx.rotate(ang);
-                ctx.translate(0, drawRadius * 0.82);
+                ctx.translate(0, drawRadius * 0.78);
                 ctx.rotate(-ang);
             }
 
-            // Viisarit
-            drawHand((m * Math.PI / 30), drawRadius * 0.8, 4, "#2196F3"); // Minuutti
-            drawHand((h * Math.PI / 6) + (m * Math.PI / 360), drawRadius * 0.5, 8, "#333"); // Tunti
-
-            // Nuppi
-            ctx.beginPath();
-            ctx.arc(0, 0, 6, 0, 2 * Math.PI);
-            ctx.fillStyle = "#333";
-            ctx.fill();
-        }
-
-        function drawHand(pos, length, width, color) {
-            ctx.beginPath();
-            ctx.lineWidth = width;
-            ctx.lineCap = "round";
-            ctx.strokeStyle = color;
-            ctx.moveTo(0, 0);
-            ctx.rotate(pos);
-            ctx.lineTo(0, -length);
-            ctx.stroke();
-            ctx.rotate(-pos);
-        }
-
-        function randomizeTime() {
-            targetHour = Math.floor(Math.random() * 12) + 1;
-            targetMinute = Math.floor(Math.random() * 12) * 5;
-            drawClock(targetHour, targetMinute);
-            document.querySelectorAll('.box').forEach(b => b.classList.remove('selected'));
-        }
-
-        function showMessage(text, color, duration) {
-            const msgDiv = document.getElementById('message');
-            msgDiv.innerText = text;
-            msgDiv.style.color = color;
-            msgDiv.style.backgroundColor = (color === "#d4a017") ? "#fff9e6" : "transparent";
-            setTimeout(() => { 
-                msgDiv.innerText = ''; 
-                msgDiv.style.backgroundColor = "transparent";
-            }, duration);
-        }
-
-        document.getElementById('check-btn').addEventListener('click', () => {
-            const selMinBox = document.querySelector('#minutes-group .selected');
-            const selRelBox = document.querySelector('#rel-group .selected');
-            const selHourBox = document.querySelector('#hours-group .selected');
-
-            const rel = selRelBox ? selRelBox.dataset.val : null;
-            const hour = selHourBox ? parseInt(selHourBox.dataset.val) : null;
-            const min = selMinBox ? parseInt(selMinBox.dataset.val) : 0;
-
-            // Tarkistus: pitää olla vähintään suhde ja tunti valittuna
-            // Jos suhde on 'yli' tai 'vaille', pitää olla minuutti (muu kuin tyhjä/0) valittuna
-            const needsMinutes = (rel === "yli" || rel === "vaille");
-            const isMinSelected = selMinBox && selMinBox.dataset.val !== "0";
-
-            if (!rel || !hour || (needsMinutes && !isMinSelected)) {
-                showMessage("Valitse kellon aika!", "#d4a017", 2000);
-                return;
-            }
-
-            let isCorrect = false;
-            const nextHour = (targetHour % 12) + 1;
-
-            if (rel === "tasan" && targetMinute === 0 && hour === targetHour) {
-                isCorrect = true;
-            } else if (rel === "puoli" && targetMinute === 30 && hour === nextHour) {
-                isCorrect = true;
-            } else if (rel === "yli" && targetMinute > 0 && targetMinute <= 20 && min === targetMinute && hour === targetHour) {
-                isCorrect = true;
-            } else if (rel === "vaille" && targetMinute >= 40 && min === (60 - targetMinute) && hour === nextHour) {
-                isCorrect = true;
-            } else if (targetMinute === 25 && rel === "vaille" && min === 5 && hour === nextHour) {
-                isCorrect = true; // 5 vaille puoli
-            } else if (targetMinute === 35 && rel === "yli" && min === 5 && hour === nextHour) {
-                isCorrect = true; // 5 yli puoli
-            }
-
-            if (isCorrect) {
-                showMessage("Oikein!", "green", 2000);
-                setTimeout(randomizeTime, 2000);
-            } else {
-                showMessage("Väärin! Yritä uudestaan", "red", 4000);
-            }
-        });
-
-        randomizeTime();
-    </script>
-</body>
-</html>
+            // Viisarit (tunti on (h + m/60))
+            drawHand((m * Math.PI / 30), draw
