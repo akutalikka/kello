@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelloharjoitus</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f4f8;
+            margin: 20px;
+        }
+
+        .container {
+            display: flex;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Vasen puoli: Kello */
+        #clock-canvas {
+            background-color: #fff;
+            border-radius: 50%;
+        }
+
+        /* Oikea puoli: Valinnat */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .box {
+            width: 50px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .box.wide { width: 80px; }
+
+        .box:hover { border-color: #2196F3; background: #e3f2fd; }
+        .box.selected { background: #2196F3; color: white; border-color: #1976D2; }
+
+        /* Palaute ja painikkeet */
+        #message {
+            height: 30px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #check-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #check-btn:hover { background-color: #45a049; }
+
+        h3 { margin-bottom: 5px; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h1>Harjoittele kelloa</h1>
+
+    <div class="container">
+        <canvas id="clock-canvas" width="300" height="300"></canvas>
+
+        <div class="controls">
+            <div>
+                <h3>Minuutit</h3>
+                <div class="option-group" id="minutes-group">
+                    <div class="box" data-val="5">5</div>
+                    <div class="box" data-val="10">10</div>
+                    <div class="box" data-val="15">15</div>
+                    <div class="box" data-val="20">20</div>
+                    <div class="box" data-val="25">25</div>
+                    <div class="box" data-val="0" title="Tyhjä"></div>
+                </div>
+            </div>
+
+            <div>
+                <h3>Suhde</h3>
+                <div class="option-group" id="rel-group">
+                    <div class="box wide" data-val="yli">yli</div>
+                    <div class="box wide" data-val="puoli">puoli</div>
+                    <div class="box wide" data-val="vaille">vaille</div>
+                    <div class="box wide" data-val="tasan">tasan</div>
+                </div>
+            </div>
+
+            <div>
+                <h3>Tunnit</h3>
+                <div class="option-group" id="hours-group">
+                    </div>
+            </div>
+
+            <div id="message"></div>
+            <button id="check-btn">Tarkista</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('clock-canvas');
+        const ctx = canvas.getContext('2d');
+        const radius = canvas.height / 2;
+        ctx.translate(radius, radius);
+        const drawRadius = radius * 0.90;
+
+        let targetHour = 0;
+        let targetMinute = 0;
+
+        // Alusta tuntilaatikot
+        const hoursGroup = document.getElementById('hours-group');
+        for (let i = 1; i <= 12; i++) {
+            const div = document.createElement('div');
+            div.className = 'box';
+            div.innerText = i;
+            div.dataset.val = i;
+            hoursGroup.appendChild(div);
+        }
+
+        // Valintojen hallinta
+        document.querySelectorAll('.option-group').forEach(group => {
+            group.addEventListener('click', (e) => {
+                if (e.target.classList.contains('box')) {
+                    group.querySelectorAll('.box').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                }
+            });
+        });
+
+        function drawClock(h, m) {
+            // Tyhjennys
+            ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
+            
+            // Kellotaulu
+            ctx.beginPath();
+            ctx.arc(0, 0, drawRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Numerot 1-12
+            ctx.font = "bold 20px Arial";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#333";
+            for (let num = 1; num <= 12; num++) {
+                let ang = num * Math.PI / 6;
+                ctx.rotate(ang);
+                ctx.translate(0, -drawRadius * 0.85);
+                ctx.rotate(-ang);
+                ctx.fillText(num.toString(), 0, 0);
+                ctx.rotate(ang);
+                ctx.translate(0, drawRadius * 0.85);
+                ctx.rotate(-ang);
+            }
+
+            // Minuuttiviisari
+            let minutePos = (m * Math.PI / 30);
+            drawHand(minutePos, drawRadius * 0.8, 4, "#2196F3");
+
+            // Tuntiviisari (liikkuu hieman minuuttien mukaan)
+            let hourPos = (h * Math.PI / 6) + (m * Math.PI / (6 * 60));
+            drawHand(hourPos, drawRadius * 0.5, 7, "#333");
+
+            // Keskipiste
+            ctx.beginPath();
+            ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "#333";
+            ctx.fill();
+        }
+
+        function drawHand(pos, length, width, color) {
+            ctx.beginPath();
+            ctx.lineWidth = width;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = color;
+            ctx.moveTo(0, 0);
+            ctx.rotate(pos);
+            ctx.lineTo(0, -length);
+            ctx.stroke();
+            ctx.rotate(-pos);
+        }
+
+        function randomizeTime() {
+            targetHour = Math.floor(Math.random() * 12) + 1;
+            targetMinute = Math.floor(Math.random() * 12) * 5; // 0, 5, 10... 55
+            drawClock(targetHour, targetMinute);
+            
+            // Tyhjennä valinnat
+            document.querySelectorAll('.box').forEach(b => b.classList.remove('selected'));
+        }
+
+        function showMessage(text, color, duration) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerText = text;
+            msgDiv.style.color = color;
+            setTimeout(() => { msgDiv.innerText = ''; }, duration);
+        }
+
+        document.getElementById('check-btn').addEventListener('click', () => {
+            const selMinBox = document.querySelector('#minutes-group .selected');
+            const selRelBox = document.querySelector('#rel-group .selected');
+            const selHourBox = document.querySelector('#hours-group .selected');
+
+            // 1. Tarkista onko tarvittavat valittu
+            const isTasan = selRelBox && selRelBox.dataset.val === "tasan";
+            const minSelected = selMinBox !== null;
+            const relSelected = selRelBox !== null;
+            const hourSelected = selHourBox !== null;
+
+            // Jos ei ole tasan, pitää valita kaikki. Jos on tasan, tyhjä minuutti tai "0" on ok.
+            if (!relSelected || !hourSelected || (!isTasan && !minSelected)) {
+                showMessage("Valitse kellon aika!", "#d4a017", 2000);
+                return;
+            }
+
+            const userMin = selMinBox ? parseInt(selMinBox.dataset.val) : 0;
+            const userRel = selRelBox.dataset.val;
+            const userHour = parseInt(selHourBox.dataset.val);
+
+            // Muunnetaan kohdeaika (targetHour, targetMinute) suomen kielen logiikkaan
+            let correctMin = 0;
+            let correctRel = "";
+            let correctHour = targetHour;
+
+            if (targetMinute === 0) {
+                correctMin = 0;
+                correctRel = "tasan";
+                correctHour = targetHour;
+            } else if (targetMinute <= 20) {
+                correctMin = targetMinute;
+                correctRel = "yli";
+                correctHour = targetHour;
+            } else if (targetMinute === 25) {
+                correctMin = 5;
+                correctRel = "vaille";
+                correctHour = (targetHour % 12) + 0.5; // Kikka puolta varten
+            } else if (targetMinute === 30) {
+                correctMin = 0; 
+                correctRel = "puoli";
+                correctHour = (targetHour % 12) + 1;
+            } else if (targetMinute === 35) {
+                correctMin = 5;
+                correctRel = "yli";
+                correctHour = (targetHour % 12) + 0.5; // Kikka puolta varten
+            } else {
+                // 40, 45, 50, 55
+                correctMin = 60 - targetMinute;
+                correctRel = "vaille";
+                correctHour = (targetHour % 12) + 1;
+            }
+
+            // Erikoiskäsittely "puoli" logiikalle
+            let isCorrect = false;
+
+            if (userRel === "tasan" && targetMinute === 0 && userHour === targetHour) {
+                isCorrect = true;
+            } else if (userRel === "puoli" && targetMinute === 30 && userHour === ((targetHour % 12) + 1)) {
+                isCorrect = true;
+            } else if (userRel === "yli" && targetMinute > 0 && targetMinute <= 20 && userMin === targetMinute && userHour === targetHour) {
+                isCorrect = true;
+            } else if (userRel === "vaille" && targetMinute >= 40 && userMin === (60-targetMinute) && userHour === ((targetHour % 12) + 1)) {
+                isCorrect = true;
+            } else if (targetMinute === 25 && userRel === "vaille" && userMin === 5 && userHour === ((targetHour % 12) + 1)) {
+                // "Viittä vaille puoli kaksi"
+                isCorrect = true;
+            } else if (targetMinute === 35 && userRel === "yli" && userMin === 5 && userHour === ((targetHour % 12) + 1)) {
+                // "Viisi yli puoli kaksi"
+                isCorrect = true;
+            }
+
+            // Puhdas korjaus: Jos targetHour oli 12 ja mennään yli, tunti on 1
+            // (Lisätty yllä % 12 logiikkaa helpottamaan)
+
+            if (isCorrect) {
+                showMessage("Oikein!", "green", 2000);
+                setTimeout(randomizeTime, 2000);
+            } else {
+                showMessage("Väärin! Yritä uudestaan", "red", 4000);
+            }
+        });
+
+        // Aloita peli
+        randomizeTime();
+    </script>
+</body>
+</html>
