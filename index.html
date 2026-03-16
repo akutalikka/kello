@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelloharjoitus - Korjattu</title>
+    <title>Kelloharjoitus</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -68,7 +68,7 @@
         #message {
             font-size: 1.5rem;
             font-weight: bold;
-            height: 50px;
+            height: 60px;
             text-align: center;
             display: flex;
             align-items: center;
@@ -91,7 +91,7 @@
         }
 
         .box {
-            min-width: 60px;
+            min-width: 65px;
             height: 60px;
             display: flex;
             align-items: center;
@@ -144,7 +144,7 @@
                 <div class="box wide" data-val="tasan">tasan</div>
             </div>
 
-            <div id="hours-container">
+            <div>
                 <h3>Tunnit</h3>
                 <div class="option-group" id="hours-row-1"></div>
                 <div class="option-group" id="hours-row-2" style="margin-top:10px;"></div>
@@ -188,7 +188,6 @@
 
         function drawClock(h, m) {
             ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
-            
             ctx.beginPath();
             ctx.arc(0, 0, drawRadius, 0, 2 * Math.PI);
             ctx.fillStyle = 'white';
@@ -201,23 +200,18 @@
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = "#333";
-            
             for (let num = 1; num <= 12; num++) {
                 let ang = num * Math.PI / 6;
                 ctx.rotate(ang);
                 ctx.translate(0, -drawRadius * 0.82);
                 ctx.rotate(-ang);
-                // Pieni korjaus numeron 12 sijoitteluun (y-offset)
                 ctx.fillText(num.toString(), 0, 2); 
                 ctx.rotate(ang);
                 ctx.translate(0, drawRadius * 0.82);
                 ctx.rotate(-ang);
             }
 
-            // Minuuttiviisari (tarkka 5min asetus)
             drawHand((m * Math.PI / 30), drawRadius * 0.85, 4, "#2196F3");
-
-            // Tuntiviisari (liukuva asento, mutta perustuu kohdatuntiin)
             let hourPos = (h * Math.PI / 6) + (m * Math.PI / 360);
             drawHand(hourPos, drawRadius * 0.5, 9, "#333");
 
@@ -240,8 +234,8 @@
         }
 
         function randomizeTime() {
-            targetHour = Math.floor(Math.random() * 12) + 1; // 1-12
-            targetMinute = Math.floor(Math.random() * 12) * 5; // 0, 5, 10... 55
+            targetHour = Math.floor(Math.random() * 12) + 1;
+            targetMinute = Math.floor(Math.random() * 12) * 5;
             drawClock(targetHour, targetMinute);
             document.querySelectorAll('.box').forEach(b => b.classList.remove('selected'));
         }
@@ -262,27 +256,23 @@
             const hourVal = selHour ? parseInt(selHour.dataset.val) : null;
             const minVal = selMin ? parseInt(selMin.dataset.val) : 0;
 
-            if (!relVal || !hourVal || ((relVal === "yli" || relVal === "vaille") && !selMin)) {
+            const minNeeded = (relVal === "yli" || relVal === "vaille");
+            if (!relVal || !hourVal || (minNeeded && !selMin)) {
                 showMessage("Valitse kellon aika!", "#d4a017", 2000);
                 return;
             }
 
             let isCorrect = false;
-            // Muunnetaan targetHour 12 -> 0 laskuja varten, jotta seuraava tunti on aina oikein (0+1=1)
-            const baseHour = targetHour === 12 ? 0 : targetHour;
-            const nextHour = baseHour + 1;
+            const nextHour = (targetHour % 12) + 1;
 
+            // YKSINKERTAISTETTU TARKISTUSLOGIIKKA
             if (relVal === "tasan" && targetMinute === 0 && hourVal === targetHour) {
                 isCorrect = true;
             } else if (relVal === "puoli" && targetMinute === 30 && hourVal === nextHour) {
                 isCorrect = true;
-            } else if (relVal === "yli" && targetMinute > 0 && targetMinute <= 20 && minVal === targetMinute && hourVal === targetHour) {
+            } else if (relVal === "yli" && targetMinute > 0 && targetMinute <= 25 && minVal === targetMinute && hourVal === targetHour) {
                 isCorrect = true;
-            } else if (relVal === "vaille" && targetMinute >= 40 && minVal === (60-targetMinute) && hourVal === nextHour) {
-                isCorrect = true;
-            } else if (targetMinute === 25 && relVal === "vaille" && minVal === 5 && hourVal === nextHour) {
-                isCorrect = true; 
-            } else if (targetMinute === 35 && relVal === "yli" && minVal === 5 && hourVal === nextHour) {
+            } else if (relVal === "vaille" && targetMinute >= 35 && targetMinute < 60 && minVal === (60 - targetMinute) && hourVal === nextHour) {
                 isCorrect = true;
             }
 
