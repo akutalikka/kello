@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelloharjoitus</title>
+    <title>Kelloharjoitus - Mobiili</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             background-color: #f0f4f8;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 800px;
-            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 450px; /* Sopii useimpiin puhelimiin */
+            width: 95%;
         }
 
+        /* YLÄOSA: Kello ja Tarkistus vierekkäin jos tilaa on */
         .top-row {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
+            margin-bottom: 15px;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
@@ -42,82 +43,73 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-            min-width: 250px;
+            gap: 8px;
+            flex: 1;
+            min-width: 140px;
         }
 
         #check-btn {
-            padding: 25px 40px;
-            font-size: 26px;
+            padding: 15px;
+            font-size: 18px;
             font-weight: bold;
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 15px;
+            border-radius: 10px;
             cursor: pointer;
             width: 100%;
-            box-shadow: 0 4px 0 #388E3C;
-            transition: all 0.1s;
-        }
-
-        #check-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #388E3C;
+            box-shadow: 0 3px 0 #388E3C;
         }
 
         #message {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            height: 60px;
+            height: 30px;
             text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
+        /* ALAOSA: Valinnat */
         .selection-area {
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            border-top: 2px solid #eee;
-            padding-top: 20px;
+            gap: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
 
         .option-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 8px;
             justify-content: center;
         }
 
         .box {
-            min-width: 65px;
-            height: 60px;
+            min-width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 2px solid #ccc;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             background: white;
-            transition: all 0.2s;
             user-select: none;
         }
 
-        .box.wide { width: 120px; height: 55px; }
-        .box:hover { border-color: #2196F3; background: #e3f2fd; }
+        .box.wide { width: 85px; height: 44px; font-size: 1rem; }
         .box.selected { background: #2196F3; color: white; border-color: #1976D2; }
 
-        h3 { margin: 0 0 10px 0; color: #555; text-align: center; }
+        h3 { margin: 0 0 5px 0; color: #555; text-align: center; font-size: 1rem; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="top-row">
-            <canvas id="clock-canvas" width="280" height="280"></canvas>
+            <canvas id="clock-canvas" width="200" height="200"></canvas>
             <div class="check-area">
                 <button id="check-btn">TARKISTA</button>
                 <div id="message"></div>
@@ -147,7 +139,7 @@
             <div>
                 <h3>Tunnit</h3>
                 <div class="option-group" id="hours-row-1"></div>
-                <div class="option-group" id="hours-row-2" style="margin-top:10px;"></div>
+                <div class="option-group" id="hours-row-2" style="margin-top:8px;"></div>
             </div>
         </div>
     </div>
@@ -193,44 +185,37 @@
             ctx.fillStyle = 'white';
             ctx.fill();
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 4;
             ctx.stroke();
 
-            ctx.font = "bold 22px Arial";
+            ctx.font = "bold 16px Arial";
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = "#333";
             for (let num = 1; num <= 12; num++) {
                 let ang = num * Math.PI / 6;
                 ctx.rotate(ang);
-                ctx.translate(0, -drawRadius * 0.82);
+                ctx.translate(0, -drawRadius * 0.8);
                 ctx.rotate(-ang);
                 ctx.fillText(num.toString(), 0, 2); 
                 ctx.rotate(ang);
-                ctx.translate(0, drawRadius * 0.82);
+                ctx.translate(0, drawRadius * 0.8);
                 ctx.rotate(-ang);
             }
 
-            drawHand((m * Math.PI / 30), drawRadius * 0.85, 4, "#2196F3");
+            drawHand((m * Math.PI / 30), drawRadius * 0.8, 3, "#2196F3");
             let hourPos = (h * Math.PI / 6) + (m * Math.PI / 360);
-            drawHand(hourPos, drawRadius * 0.5, 9, "#333");
-
+            drawHand(hourPos, drawRadius * 0.5, 6, "#333");
             ctx.beginPath();
-            ctx.arc(0, 0, 8, 0, 2 * Math.PI);
+            ctx.arc(0, 0, 5, 0, 2 * Math.PI);
             ctx.fillStyle = "#333";
             ctx.fill();
         }
 
         function drawHand(pos, length, width, color) {
-            ctx.beginPath();
-            ctx.lineWidth = width;
-            ctx.lineCap = "round";
-            ctx.strokeStyle = color;
-            ctx.moveTo(0, 0);
-            ctx.rotate(pos);
-            ctx.lineTo(0, -length);
-            ctx.stroke();
-            ctx.rotate(-pos);
+            ctx.beginPath(); ctx.lineWidth = width; ctx.lineCap = "round";
+            ctx.strokeStyle = color; ctx.moveTo(0, 0); ctx.rotate(pos);
+            ctx.lineTo(0, -length); ctx.stroke(); ctx.rotate(-pos);
         }
 
         function randomizeTime() {
@@ -256,31 +241,24 @@
             const hourVal = selHour ? parseInt(selHour.dataset.val) : null;
             const minVal = selMin ? parseInt(selMin.dataset.val) : 0;
 
-            const minNeeded = (relVal === "yli" || relVal === "vaille");
-            if (!relVal || !hourVal || (minNeeded && !selMin)) {
-                showMessage("Valitse kellon aika!", "#d4a017", 2000);
+            if (!relVal || !hourVal || ((relVal === "yli" || relVal === "vaille") && !selMin)) {
+                showMessage("Valitse aika!", "#d4a017", 2000);
                 return;
             }
 
             let isCorrect = false;
             const nextHour = (targetHour % 12) + 1;
 
-            // YKSINKERTAISTETTU TARKISTUSLOGIIKKA
-            if (relVal === "tasan" && targetMinute === 0 && hourVal === targetHour) {
-                isCorrect = true;
-            } else if (relVal === "puoli" && targetMinute === 30 && hourVal === nextHour) {
-                isCorrect = true;
-            } else if (relVal === "yli" && targetMinute > 0 && targetMinute <= 25 && minVal === targetMinute && hourVal === targetHour) {
-                isCorrect = true;
-            } else if (relVal === "vaille" && targetMinute >= 35 && targetMinute < 60 && minVal === (60 - targetMinute) && hourVal === nextHour) {
-                isCorrect = true;
-            }
+            if (relVal === "tasan" && targetMinute === 0 && hourVal === targetHour) isCorrect = true;
+            else if (relVal === "puoli" && targetMinute === 30 && hourVal === nextHour) isCorrect = true;
+            else if (relVal === "yli" && targetMinute > 0 && targetMinute <= 25 && minVal === targetMinute && hourVal === targetHour) isCorrect = true;
+            else if (relVal === "vaille" && targetMinute >= 35 && targetMinute < 60 && minVal === (60 - targetMinute) && hourVal === nextHour) isCorrect = true;
 
             if (isCorrect) {
-                showMessage("Oikein!", "green", 2000);
-                setTimeout(randomizeTime, 2000);
+                showMessage("Oikein!", "green", 1500);
+                setTimeout(randomizeTime, 1500);
             } else {
-                showMessage("Väärin! Yritä uudestaan", "red", 4000);
+                showMessage("Väärin!", "red", 3000);
             }
         });
 
